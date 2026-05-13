@@ -1,0 +1,98 @@
+# Features used in training
+features:
+  technical:
+    - name: rsi_14
+      description: Relative Strength Index (14 days)
+      range: [0, 100]
+      thresholds:
+        oversold: 30
+        overbought: 70
+
+    - name: rsi_7
+      description: Relative Strength Index (7 days)
+      range: [0, 100]
+
+    - name: macd
+      description: MACD line (EMA12 - EMA26)
+
+    - name: macd_signal
+      description: MACD signal line (EMA9 of MACD)
+
+    - name: macd_hist
+      description: MACD histogram
+
+    - name: bb_pct
+      description: Bollinger Band %B (position within bands)
+      range: [0, 1]
+
+    - name: atr_14
+      description: Average True Range (14 days) — volatility measure
+
+    - name: price_vs_sma20
+      description: Price deviation from 20-day SMA
+
+    - name: price_vs_sma50
+      description: Price deviation from 50-day SMA
+
+    - name: return_1d
+      description: 1-day price return
+    - name: return_3d
+      description: 3-day price return
+    - name: return_5d
+      description: 5-day price return
+    - name: return_10d
+      description: 10-day price return
+
+    - name: volume_ratio_20
+      description: Current volume vs 20-day average
+
+    - name: volatility_20
+      description: 20-day annualized volatility
+
+  fundamental:
+    - name: pe
+      description: Price-to-Earnings ratio
+      thresholds:
+        cheap: 10
+        expensive: 25
+
+    - name: pb
+      description: Price-to-Book ratio
+
+    - name: eps
+      description: Earnings Per Share (VND)
+
+    - name: roe
+      description: Return on Equity
+      thresholds:
+        good: 0.15
+
+    - name: roa
+      description: Return on Assets
+
+  macro:
+    - name: interest_rate
+      description: Vietnam central bank interest rate (%)
+
+    - name: cpi
+      description: Consumer Price Index (%)
+
+    - name: usd_vnd
+      description: USD/VND exchange rate
+
+# Training settings
+training:
+  target_horizon_days: 5
+  target_threshold_pct: 1.0   # > 1% = BUY signal
+  test_size: 0.2
+  cv_folds: 5
+  model: xgboost
+
+# Model hyperparameters
+xgboost:
+  n_estimators: 500
+  max_depth: 6
+  learning_rate: 0.04
+  subsample: 0.8
+  colsample_bytree: 0.8
+  random_state: 42

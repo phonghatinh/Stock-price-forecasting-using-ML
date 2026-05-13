@@ -1,0 +1,22 @@
+{
+  "version": "v1.0",
+  "train_date": "2026-05-06T00:00:00",
+  "features": [
+    "rsi_14", "rsi_7", "macd", "macd_signal", "macd_hist",
+    "bb_pct", "atr_14", "price_vs_sma20", "price_vs_sma50",
+    "return_1d", "return_3d", "return_5d", "return_10d",
+    "volume_ratio_20", "volatility_20",
+    "pe", "pb", "eps", "roe", "roa",
+    "interest_rate", "cpi", "usd_vnd"
+  ],
+  "n_features": 23,
+  "tickers": ["VNM", "VCB", "HPG", "SSI", "FPT", "MBB", "TCB", "ACB"],
+  "from_date": "2020-01-01",
+  "to_date": "2026-05-01",
+  "target_horizon_days": 5,
+  "cv_accuracy_mean": 0.6234,
+  "cv_accuracy_std": 0.0412,
+  "training_samples": 14256,
+  "model_type": "xgboost",
+  "note": "Placeholder metadata — run ml/pipelines/train.py to generate real model"
+}

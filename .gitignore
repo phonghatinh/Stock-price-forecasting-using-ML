@@ -1,0 +1,21 @@
+# Python
+backend/venv/
+venv/
+__pycache__/
+*.pyc
+.env
+
+# Node / Next.js
+frontend/node_modules/
+node_modules/
+frontend/.next/
+.next/
+out/
+
+# Logs
+*.log
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/
