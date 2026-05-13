@@ -84,6 +84,3 @@ Trains XGBoost model với:
 - TimeSeriesSplit cross-validation
 - SHAP explainer tự động
 
-## 🔐 Credentials
-- FiinQuant: `anh.phamthitu@fiingroup.vn`
-- API docs: http://localhost:8000/api/docs
