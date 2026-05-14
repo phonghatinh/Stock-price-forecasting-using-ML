@@ -132,44 +132,51 @@ class PredictionService:
         features["foreign_net"] = float(rng.normal(0, 0.3))
         return features
 
+    async def _process_single_ticker(self, ticker: str, horizon_days: int) -> Optional[Dict[str, Any]]:
+        try:
+            # Await the async function directly
+            features = await self._build_features(ticker)
+            signal = self.xai.compute_signal(features)
+            shap_features = self.xai.compute_shap_values(features)
+            narrative = self.xai.generate_narrative(
+                ticker, signal, shap_features,
+                technicals={k: features[k] for k in ["rsi_14", "macd", "volume_ratio"] if k in features},
+                fundamentals={k: features[k] for k in ["pe", "pb", "roe", "eps"] if k in features},
+            )
+
+            current_price = features.get("close", 50000)
+            predicted_return = self._estimate_return(signal, features, horizon_days)
+            target_price = current_price * (1 + predicted_return)
+
+            top_reasons = [
+                f"{f['label']}: {f['value']:.2f} (ảnh hưởng: {'+' if f['impact'] == 'positive' else '-'})"
+                for f in shap_features[:3]
+            ]
+
+            return {
+                "ticker": ticker,
+                "signal": signal["signal"],
+                "confidence": signal["confidence"],
+                "predicted_return": round(predicted_return * 100, 2),
+                "target_price": round(target_price, 0),
+                "current_price": round(current_price, 0),
+                "risk_level": narrative["risk_level"],
+                "top_reasons": top_reasons,
+                "shap_summary": {f["feature"]: f["shap_value"] for f in shap_features[:5]},
+                "analyzed_at": datetime.now().isoformat(),
+            }
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Prediction error for {ticker}: {e}")
+            return None
+
     async def predict_batch_async(self, tickers: List[str], horizon_days: int = 5) -> Dict[str, Any]:
-        """Async batch AI recommendations."""
+        """Async batch AI recommendations using asyncio.gather for parallel execution."""
         import asyncio
-        recommendations = []
-        for ticker in tickers:
-            try:
-                features = await self._build_features(ticker)
-                signal = self.xai.compute_signal(features)
-                shap_features = self.xai.compute_shap_values(features)
-                narrative = self.xai.generate_narrative(
-                    ticker, signal, shap_features,
-                    technicals={k: features[k] for k in ["rsi_14", "macd", "volume_ratio"] if k in features},
-                    fundamentals={k: features[k] for k in ["pe", "pb", "roe", "eps"] if k in features},
-                )
-
-                current_price = features.get("close", 50000)
-                predicted_return = self._estimate_return(signal, features, horizon_days)
-                target_price = current_price * (1 + predicted_return)
-
-                top_reasons = [
-                    f"{f['label']}: {f['value']:.2f} (ảnh hưởng: {'+' if f['impact'] == 'positive' else '-'})"
-                    for f in shap_features[:3]
-                ]
-
-                recommendations.append({
-                    "ticker": ticker,
-                    "signal": signal["signal"],
-                    "confidence": signal["confidence"],
-                    "predicted_return": round(predicted_return * 100, 2),
-                    "target_price": round(target_price, 0),
-                    "current_price": round(current_price, 0),
-                    "risk_level": narrative["risk_level"],
-                    "top_reasons": top_reasons,
-                    "shap_summary": {f["feature"]: f["shap_value"] for f in shap_features[:5]},
-                    "analyzed_at": datetime.now().isoformat(),
-                })
-            except Exception as e:
-                logger.error(f"Prediction error for {ticker}: {e}")
+        tasks = [self._process_single_ticker(ticker, horizon_days) for ticker in tickers]
+        results = await asyncio.gather(*tasks)
+        recommendations = [r for r in results if r is not None]
 
         return {
             "recommendations": recommendations,

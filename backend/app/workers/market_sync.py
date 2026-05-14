@@ -81,7 +81,7 @@ def _normalize_df(df) -> list:
 
 async def sync_market_data():
     """Sync latest EOD data — called daily at 18:00."""
-    logger.info("🔄 Starting daily market data sync...")
+    logger.info("Starting daily market data sync...")
     client = get_fiinquant_client()
 
     # Build ticker list
@@ -96,7 +96,7 @@ async def sync_market_data():
         tickers.extend(FALLBACK_TICKERS)
 
     tickers = list(set(tickers))
-    from_date = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
+    from_date = (datetime.now() - timedelta(days=14)).strftime("%Y-%m-%d")
     logger.info(f"Syncing {len(tickers)} tickers from {from_date}")
 
     # Batch process
@@ -137,8 +137,8 @@ async def sync_market_data():
                 )
                 await session.execute(stmt)
                 await session.commit()
-            logger.info("✅ Market breadth synced")
+            logger.info("Market breadth synced")
     except Exception as e:
         logger.warning(f"Breadth sync error: {e}")
 
-    logger.info(f"✅ Daily sync complete. Total rows: {total_rows}")
+    logger.info(f"Daily sync complete. Total rows: {total_rows}")
