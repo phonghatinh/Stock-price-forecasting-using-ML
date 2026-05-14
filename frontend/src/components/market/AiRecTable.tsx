@@ -20,14 +20,14 @@ export default function AiRecTable({ onTickerClick, selectedTicker }: Props) {
   const { data, isLoading } = useSWR(
     `ai-recs-${horizon}`,
     () => predictionApi.getRecommendations(VN_TICKERS.slice(0, 15).join(','), horizon),
-    { revalidateOnFocus: false, refreshInterval: 300_000 }
+    { revalidateOnFocus: false, refreshInterval: 300_000, dedupingInterval: 120_000 }
   );
 
   const recs = data?.recommendations ?? [];
 
   return (
-    <div className="card">
-      <div className="section-header">
+    <div className="card" style={{ padding: '14px 18px' }}>
+      <div className="section-header" style={{ marginBottom: 12 }}>
         <div className="section-title">
           <span>🤖</span> AI Khuyến nghị
         </div>
